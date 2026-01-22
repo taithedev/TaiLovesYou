@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TaiLovesyouu</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* ===== RESET ===== */
+* {
+  box-sizing: border-box;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #1b1b2a, #05050a);
+  color: white;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== LIQUID GLASS ===== */
+.glass {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+/* ===== HEADER ===== */
+header {
+  padding: 20px;
+  margin: 20px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 26px;
+}
+
+/* ===== LAYOUT ===== */
+main {
+  display: grid;
+  grid-template-columns: 260px 1fr 300px;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* ===== SIDEBAR ===== */
+#sidebar {
+  padding: 20px;
+}
+
+#sidebar button {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  transition: 0.2s;
+}
+
+#sidebar button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ===== NOTES ===== */
+#notes {
+  padding: 20px;
+}
+
+#notesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap: 15px;
+}
+
+.note {
+  padding: 15px;
+  border-radius: 16px;
+  cursor: grab;
+}
+
+.note textarea {
+  width: 100%;
+  height: 120px;
+  background: transparent;
+  border: none;
+  color: white;
+  resize: none;
+  outline: none;
+  font-size: 14px;
+}
+
+/* ===== CHAT ===== */
+#chat {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+#chatMessages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.chatMsg {
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+#chat input {
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+}
+
+/* ===== USERS ===== */
+.user {
+  font-size: 13px;
+  margin-bottom: 6px;
+  opacity: 0.9;
+}
+</style>
+</head>
+
+<body>
+
+<header class="glass">
+  <h1>💜 TaiLovesyouu</h1>
+  <p>tailovesyou.vercel.app</p>
+</header>
+
+<main>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="glass">
+    <button onclick="addNote()">➕ New Note</button>
+    <button onclick="clearNotes()">🗑 Clear Notes</button>
+  </aside>
+
+  <!-- NOTES -->
+  <section id="notes" class="glass">
+    <h2>Notes</h2>
+    <div id="notesGrid"></div>
+  </section>
+
+  <!-- CHAT + USERS -->
+  <section id="chat" class="glass">
+    <h2>Live Chat</h2>
+    <div id="chatMessages"></div>
+    <input id="chatInput" placeholder="Say something…" onkeydown="sendChat(event)">
+
+    <hr style="opacity:.2">
+
+    <h3>Active Users</h3>
+    <div id="users"></div>
+  </section>
+
+</main>
+
+<script>
+/* ===== NOTES ===== */
+let notes = JSON.parse(localStorage.getItem("notes") || "[]");
+const grid = document.getElementById("notesGrid");
+
+function renderNotes() {
+  grid.innerHTML = "";
+  notes.forEach((text, i) => {
+    const n = document.createElement("div");
+    n.className = "note glass";
+    n.draggable = true;
+
+    const t = document.createElement("textarea");
+    t.value = text;
+    t.oninput = () => {
+      notes[i] = t.value;
+      saveNotes();
+    };
+
+    n.appendChild(t);
+    grid.appendChild(n);
+  });
+}
+
+function addNote() {
+  notes.push("");
+  saveNotes();
+  renderNotes();
+}
+
+function clearNotes() {
+  if (!confirm("Delete all notes?")) return;
+  notes = [];
+  saveNotes();
+  renderNotes();
+}
+
+function saveNotes() {
+  localStorage.setItem("notes", JSON.stringify(notes));
+}
+
+renderNotes();
+
+/* ===== CHAT ===== */
+const chatMessages = document.getElementById("chatMessages");
+
+function sendChat(e) {
+  if (e.key !== "Enter") return;
+  const msg = e.target.value.trim();
+  if (!msg) return;
+
+  const div = document.createElement("div");
+  div.className = "chatMsg";
+  div.textContent = "You: " + msg;
+  chatMessages.appendChild(div);
+
+  e.target.value = "";
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+/* ===== USERS (FAKE LIVE) ===== */
+const usersDiv = document.getElementById("users");
+const fakeUsers = ["Alex", "Kai", "Nova", "Luna", "Jay"];
+
+function renderUsers() {
+  usersDiv.innerHTML = "";
+  fakeUsers.slice(0, Math.floor(Math.random()*5)+1).forEach(u => {
+    const d = document.createElement("div");
+    d.className = "user";
+    d.textContent = "🟢 " + u + " (active)";
+    usersDiv.appendChild(d);
+  });
+}
+
+setInterval(renderUsers, 3000);
+renderUsers();
+</script>
+
+</body>
+</html>

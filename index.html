@@ -4,246 +4,269 @@
 <meta charset="UTF-8">
 <title>TaiLovesyouu</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="TaiLovesyou2026">
+
+<!-- SUPABASE -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-/* ===== RESET ===== */
-* {
-  box-sizing: border-box;
-  font-family: "Inter", system-ui, sans-serif;
+:root {
+  --accent: #a855f7;
+  --bg1: #0b0b14;
+  --bg2: #050508;
+  --glass-bg: rgba(255,255,255,0.08);
+  --glass-border: rgba(255,255,255,0.18);
+  --blur: 18px;
+  --radius: 20px;
+  --anim: 0.25s;
 }
 
+* { box-sizing: border-box; font-family: Inter, sans-serif; }
 body {
-  margin: 0;
-  background: radial-gradient(circle at top, #1b1b2a, #05050a);
-  color: white;
-  min-height: 100vh;
-  overflow-x: hidden;
+  margin: 0; min-height: 100vh;
+  background: radial-gradient(circle at top, var(--bg1), var(--bg2));
+  color: white; overflow-x: hidden;
 }
-
-/* ===== LIQUID GLASS ===== */
+body::after {
+  content: "TaiLovesyou2026"; position: fixed;
+  bottom: 10px; right: 14px; opacity: 0.15; font-size: 12px;
+  pointer-events: none;
+}
 .glass {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: 0 0 35px rgba(0,0,0,.6);
 }
-
-/* ===== HEADER ===== */
-header {
-  padding: 20px;
-  margin: 20px;
+header { margin:20px; padding:20px; }
+header h1 { margin:0; font-size:26px; }
+nav { display:flex; gap:10px; margin-top:10px; }
+nav button {
+  padding:8px 14px; border-radius:14px; border:none;
+  background: rgba(255,255,255,0.1); color:white; cursor:pointer;
+  transition: var(--anim);
 }
-
-header h1 {
-  margin: 0;
-  font-size: 26px;
-}
-
-/* ===== LAYOUT ===== */
-main {
-  display: grid;
-  grid-template-columns: 260px 1fr 300px;
-  gap: 20px;
-  padding: 20px;
-}
-
-/* ===== SIDEBAR ===== */
-#sidebar {
-  padding: 20px;
-}
-
-#sidebar button {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 12px;
-  border-radius: 14px;
-  border: none;
-  cursor: pointer;
-  background: rgba(255,255,255,0.1);
-  color: white;
-  transition: 0.2s;
-}
-
-#sidebar button:hover {
-  background: rgba(255,255,255,0.2);
-}
-
-/* ===== NOTES ===== */
-#notes {
-  padding: 20px;
-}
-
-#notesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
-  gap: 15px;
-}
-
-.note {
-  padding: 15px;
-  border-radius: 16px;
-  cursor: grab;
-}
-
-.note textarea {
-  width: 100%;
-  height: 120px;
-  background: transparent;
-  border: none;
-  color: white;
-  resize: none;
-  outline: none;
-  font-size: 14px;
-}
-
-/* ===== CHAT ===== */
-#chat {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-#chatMessages {
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 10px;
-}
-
-.chatMsg {
-  margin-bottom: 6px;
-  font-size: 13px;
-}
-
-#chat input {
-  padding: 10px;
-  border-radius: 12px;
-  border: none;
-  outline: none;
-}
-
-/* ===== USERS ===== */
-.user {
-  font-size: 13px;
-  margin-bottom: 6px;
-  opacity: 0.9;
-}
+nav button:hover { background: var(--accent); }
+main { padding:20px; }
+.page { display:none; animation: fade var(--anim) ease; }
+.page.active { display:block; }
+@keyframes fade { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
+#login { max-width:400px; margin:15vh auto; padding:25px; }
+#login input { width:100%; margin-bottom:12px; padding:12px; border-radius:14px; border:none; outline:none; }
+#notesGrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:15px; }
+.note { padding:14px; }
+.note textarea { width:100%; height:140px; background:transparent; border:none; color:white; resize:none; outline:none; }
+.setting { margin-bottom:16px; }
+.setting label { font-size:13px; opacity:.8; display:block; margin-bottom:4px; }
+.setting input[type="range"], .setting input[type="color"] { width:100%; }
+.chatMsg { font-size:13px; margin-bottom:6px; opacity:.9; }
+#chatBox { max-height:250px; overflow-y:auto; margin-bottom:10px; }
 </style>
 </head>
 
 <body>
 
-<header class="glass">
-  <h1>💜 TaiLovesyouu</h1>
-  <p>tailovesyou.vercel.app</p>
-</header>
+<!-- LOGIN -->
+<div id="login" class="glass">
+  <h2>💜 TaiLovesyouu</h2>
+  <p>Email:</p>
+  <input id="email" placeholder="Email">
+  <p>Password:</p>
+  <input id="pass" type="password" placeholder="Password">
+  <p>Username (register only):</p>
+  <input id="username" placeholder="Username">
+  <button onclick="registerUser()">Register</button>
+  <button onclick="loginUser()">Login</button>
+  <p style="margin-top:10px;font-size:12px;opacity:0.7;">Site access password: tailovesyou</p>
+</div>
 
-<main>
+<!-- APP -->
+<div id="app">
+  <header class="glass">
+    <h1>TaiLovesyouu</h1>
+    <nav>
+      <button onclick="go('notes')">Notes</button>
+      <button onclick="go('chat')">Chat</button>
+      <button onclick="go('settings')">Settings</button>
+      <button onclick="go('profile')">Profile</button>
+      <button onclick="go('proPage')">Pro</button>
+      <button onclick="go('staffPage')">Staff</button>
+    </nav>
+  </header>
 
-  <!-- SIDEBAR -->
-  <aside id="sidebar" class="glass">
-    <button onclick="addNote()">➕ New Note</button>
-    <button onclick="clearNotes()">🗑 Clear Notes</button>
-  </aside>
+  <main>
 
-  <!-- NOTES -->
-  <section id="notes" class="glass">
-    <h2>Notes</h2>
-    <div id="notesGrid"></div>
-  </section>
+    <!-- NOTES -->
+    <section id="notes" class="page glass">
+      <h2>Notes</h2>
+      <button onclick="addNote()">➕ New Note</button>
+      <div id="notesGrid"></div>
+    </section>
 
-  <!-- CHAT + USERS -->
-  <section id="chat" class="glass">
-    <h2>Live Chat</h2>
-    <div id="chatMessages"></div>
-    <input id="chatInput" placeholder="Say something…" onkeydown="sendChat(event)">
+    <!-- CHAT -->
+    <section id="chat" class="page glass">
+      <h2>Chat</h2>
+      <div id="chatBox"></div>
+      <input id="chatInput" placeholder="Say something…" onkeydown="sendChat(event)">
+    </section>
 
-    <hr style="opacity:.2">
+    <!-- SETTINGS -->
+    <section id="settings" class="page glass">
+      <h2>Settings</h2>
+      <div class="setting">
+        <label>Accent Color</label>
+        <input type="color" onchange="setVar('--accent', this.value)">
+      </div>
+      <div class="setting">
+        <label>Glass Blur</label>
+        <input type="range" min="5" max="40" value="18" oninput="setVar('--blur', this.value+'px')">
+      </div>
+      <div class="setting">
+        <label>Border Radius</label>
+        <input type="range" min="10" max="40" value="20" oninput="setVar('--radius', this.value+'px')">
+      </div>
+      <div class="setting">
+        <label>Unlock Role (Pro/Staff)</label>
+        <input id="rolePass" placeholder="Password">
+        <button onclick="unlockRole(document.getElementById('rolePass').value)">Unlock</button>
+      </div>
+    </section>
 
-    <h3>Active Users</h3>
-    <div id="users"></div>
-  </section>
+    <!-- PROFILE -->
+    <section id="profile" class="page glass">
+      <h2>Profile</h2>
+      <p>Username: <b id="profileName"></b></p>
+      <p>Role: <b id="role">User</b></p>
+    </section>
 
-</main>
+    <!-- PRO PAGE -->
+    <section id="proPage" class="page glass">
+      <h2>Pro Tools</h2>
+      <p>Only visible if Pro or Staff</p>
+    </section>
+
+    <!-- STAFF PAGE -->
+    <section id="staffPage" class="page glass">
+      <h2>Staff Panel</h2>
+      <p>Only visible if Staff</p>
+    </section>
+
+  </main>
+</div>
 
 <script>
-/* ===== NOTES ===== */
-let notes = JSON.parse(localStorage.getItem("notes") || "[]");
-const grid = document.getElementById("notesGrid");
+const SUPABASE_URL = "https://briwvcsduzssmjipxupb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_KXEckjdTYLzecNnacueLaA_JU8dUceV";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+let role = "user";
+let notes = [];
+
+// ================= LOGIN / REGISTER =================
+async function registerUser() {
+  const email = document.getElementById('email').value;
+  const pass = document.getElementById('pass').value;
+  const username = document.getElementById('username').value;
+
+  if(!email || !pass || !username) return alert("Fill all fields");
+
+  const { data, error } = await supabase.auth.signUp({ email, password: pass });
+  if(error) return alert(error.message);
+
+  await supabase.from("profiles").insert({ id: data.user.id, username, role: "user" });
+  alert("Account created! Login now.");
+}
+
+async function loginUser() {
+  const email = document.getElementById('email').value;
+  const pass = document.getElementById('pass').value;
+
+  if(!email || !pass) return alert("Fill all fields");
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  if(error) return alert(error.message);
+
+  currentUser = data.user;
+  await loadProfile();
+  login.style.display="none";
+  app.style.display="block";
+  go("notes");
+}
+
+// ================= PROFILE =================
+async function loadProfile() {
+  const { data } = await supabase.from("profiles").select("*").eq("id", currentUser.id).single();
+  currentProfile = data;
+  role = data.role;
+  document.getElementById("role").textContent = role;
+  document.getElementById("profileName").textContent = data.username;
+  renderNotes();
+}
+
+// ================= NOTES =================
+async function loadNotes() {
+  if(!currentUser) return;
+  const { data } = await supabase.from("notes").select("*").eq("user_id", currentUser.id).order("pinned", {ascending:false});
+  notes = data || [];
+  renderNotes();
+}
 
 function renderNotes() {
-  grid.innerHTML = "";
-  notes.forEach((text, i) => {
-    const n = document.createElement("div");
-    n.className = "note glass";
-    n.draggable = true;
-
-    const t = document.createElement("textarea");
-    t.value = text;
-    t.oninput = () => {
-      notes[i] = t.value;
-      saveNotes();
+  notesGrid.innerHTML="";
+  notes.forEach((t,i)=>{
+    const n=document.createElement("div"); n.className="note glass";
+    const ta=document.createElement("textarea"); ta.value=t.content || ""; 
+    ta.oninput=async ()=>{
+      t.content=ta.value;
+      await supabase.from("notes").upsert({id:t.id, user_id:currentUser.id, content:t.content});
     };
-
-    n.appendChild(t);
-    grid.appendChild(n);
+    n.appendChild(ta);
+    notesGrid.appendChild(n);
   });
 }
 
-function addNote() {
-  notes.push("");
-  saveNotes();
+async function addNote() {
+  if(!currentUser) return alert("Login first");
+  const { data } = await supabase.from("notes").insert({user_id:currentUser.id, content:""}).select().single();
+  notes.push(data);
   renderNotes();
 }
 
-function clearNotes() {
-  if (!confirm("Delete all notes?")) return;
-  notes = [];
-  saveNotes();
-  renderNotes();
+// ================= CHAT =================
+chatInput.addEventListener("keydown", async (e)=>{
+  if(e.key!=="Enter") return;
+  const msg = e.target.value;
+  if(!msg) return;
+  await supabase.from("messages").insert({user_id:currentUser.id, message:msg});
+  const d=document.createElement("div"); d.className="chatMsg"; d.textContent="You: "+msg; chatBox.appendChild(d);
+  e.target.value="";
+});
+
+// ================= SETTINGS =================
+function setVar(name,val){document.documentElement.style.setProperty(name,val);}
+async function unlockRole(pass){
+  let newRole=null;
+  if(pass==="taiwantshuzz") newRole="pro";
+  if(pass==="cuhlove") newRole="staff";
+  if(!newRole) return alert("Wrong password");
+  await supabase.from("profiles").update({role:newRole}).eq("id",currentUser.id);
+  role=newRole; document.getElementById("role").textContent=role;
+  alert("Unlocked role: "+newRole);
 }
 
-function saveNotes() {
-  localStorage.setItem("notes", JSON.stringify(notes));
-}
+// ================= SPA ROUTING =================
+function go(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active")); document.getElementById(id).classList.add("active");}
 
-renderNotes();
+// ================= LAST ACTIVE =================
+setInterval(async ()=>{
+  if(!currentUser) return;
+  await supabase.from("profiles").update({last_active:new Date()}).eq("id",currentUser.id);
+},60000);
 
-/* ===== CHAT ===== */
-const chatMessages = document.getElementById("chatMessages");
-
-function sendChat(e) {
-  if (e.key !== "Enter") return;
-  const msg = e.target.value.trim();
-  if (!msg) return;
-
-  const div = document.createElement("div");
-  div.className = "chatMsg";
-  div.textContent = "You: " + msg;
-  chatMessages.appendChild(div);
-
-  e.target.value = "";
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-/* ===== USERS (FAKE LIVE) ===== */
-const usersDiv = document.getElementById("users");
-const fakeUsers = ["Alex", "Kai", "Nova", "Luna", "Jay"];
-
-function renderUsers() {
-  usersDiv.innerHTML = "";
-  fakeUsers.slice(0, Math.floor(Math.random()*5)+1).forEach(u => {
-    const d = document.createElement("div");
-    d.className = "user";
-    d.textContent = "🟢 " + u + " (active)";
-    usersDiv.appendChild(d);
-  });
-}
-
-setInterval(renderUsers, 3000);
-renderUsers();
 </script>
-
 </body>
 </html>

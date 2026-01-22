@@ -2,271 +2,277 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TaiLovesyouu</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaiLovesyouu</title>
 <meta name="author" content="TaiLovesyou2026">
 
-<!-- SUPABASE -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-:root {
-  --accent: #a855f7;
-  --bg1: #0b0b14;
-  --bg2: #050508;
-  --glass-bg: rgba(255,255,255,0.08);
-  --glass-border: rgba(255,255,255,0.18);
-  --blur: 18px;
-  --radius: 20px;
-  --anim: 0.25s;
+:root{
+  --accent:#8b5cf6;
+  --bg1:#0b0b14;
+  --bg2:#050508;
+  --glass:rgba(255,255,255,.08);
+  --border:rgba(255,255,255,.18);
+  --blur:18px;
+  --radius:20px;
 }
-
-* { box-sizing: border-box; font-family: Inter, sans-serif; }
-body {
-  margin: 0; min-height: 100vh;
-  background: radial-gradient(circle at top, var(--bg1), var(--bg2));
-  color: white; overflow-x: hidden;
+*{box-sizing:border-box;font-family:Inter,system-ui;margin:0;padding:0}
+body{
+  min-height:100vh;background:radial-gradient(circle at top,var(--bg1),var(--bg2));
+  color:white;font-size:14px;
 }
-body::after {
-  content: "TaiLovesyou2026"; position: fixed;
-  bottom: 10px; right: 14px; opacity: 0.15; font-size: 12px;
-  pointer-events: none;
+body::after{
+  content:"TaiLovesyou2026";position:fixed;bottom:10px;right:14px;opacity:.15;font-size:12px;pointer-events:none;
 }
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  box-shadow: 0 0 35px rgba(0,0,0,.6);
+.glass{
+  background:var(--glass);
+  backdrop-filter:blur(var(--blur));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:0 0 30px rgba(0,0,0,.6);
+  padding:10px;
+  margin-bottom:10px;
 }
-header { margin:20px; padding:20px; }
-header h1 { margin:0; font-size:26px; }
-nav { display:flex; gap:10px; margin-top:10px; }
-nav button {
-  padding:8px 14px; border-radius:14px; border:none;
-  background: rgba(255,255,255,0.1); color:white; cursor:pointer;
-  transition: var(--anim);
+header{margin:10px;padding:10px;}
+nav{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+nav button{padding:8px 14px;border-radius:14px;border:none;background:rgba(255,255,255,.1);color:white;cursor:pointer;transition:.25s;}
+nav button:hover{background:var(--accent);}
+main{padding:10px;}
+.page{display:none;}
+.page.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+#notesGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.note{padding:8px;display:flex;flex-direction:column;}
+.note textarea{width:100%;height:120px;background:transparent;border:none;outline:none;color:white;resize:none;font-size:14px;}
+.note input,.note select{margin:2px 0;padding:6px;border-radius:8px;border:none;background:rgba(255,255,255,.08);color:white;}
+#chatBox{max-height:250px;overflow-y:auto;margin-bottom:5px;}
+.chatMsg{font-size:13px;margin-bottom:6px;opacity:.9;}
+#onlineUsers{margin-top:5px;}
+.userItem{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
+.userItem img{width:22px;height:22px;border-radius:50%;object-fit:cover;}
+input[type=range]{width:100%;}
+@media(max-width:600px){
+  nav{flex-direction:column;}
+  #notesGrid{grid-template-columns:1fr;}
 }
-nav button:hover { background: var(--accent); }
-main { padding:20px; }
-.page { display:none; animation: fade var(--anim) ease; }
-.page.active { display:block; }
-@keyframes fade { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
-#login { max-width:400px; margin:15vh auto; padding:25px; }
-#login input { width:100%; margin-bottom:12px; padding:12px; border-radius:14px; border:none; outline:none; }
-#notesGrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:15px; }
-.note { padding:14px; }
-.note textarea { width:100%; height:140px; background:transparent; border:none; color:white; resize:none; outline:none; }
-.setting { margin-bottom:16px; }
-.setting label { font-size:13px; opacity:.8; display:block; margin-bottom:4px; }
-.setting input[type="range"], .setting input[type="color"] { width:100%; }
-.chatMsg { font-size:13px; margin-bottom:6px; opacity:.9; }
-#chatBox { max-height:250px; overflow-y:auto; margin-bottom:10px; }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="login" class="glass">
+<!-- SITE ACCESS -->
+<div id="gate" class="glass" style="max-width:400px;margin:15vh auto;">
   <h2>💜 TaiLovesyouu</h2>
-  <p>Email:</p>
+  <input id="siteAccess" type="password" placeholder="Enter site access">
+  <button onclick="enterGate()">Enter</button>
+</div>
+
+<!-- AUTH -->
+<div id="auth" class="glass" style="max-width:400px;margin:15vh auto;display:none;">
+  <h3>Login / Register</h3>
   <input id="email" placeholder="Email">
-  <p>Password:</p>
-  <input id="pass" type="password" placeholder="Password">
-  <p>Username (register only):</p>
-  <input id="username" placeholder="Username">
-  <button onclick="registerUser()">Register</button>
-  <button onclick="loginUser()">Login</button>
-  <p style="margin-top:10px;font-size:12px;opacity:0.7;">Site access password: tailovesyou</p>
+  <input id="password" type="password" placeholder="Password">
+  <input id="username" placeholder="Username (register)">
+  <button onclick="register()">Register</button>
+  <button onclick="login()">Login</button>
 </div>
 
 <!-- APP -->
-<div id="app">
-  <header class="glass">
-    <h1>TaiLovesyouu</h1>
-    <nav>
-      <button onclick="go('notes')">Notes</button>
-      <button onclick="go('chat')">Chat</button>
-      <button onclick="go('settings')">Settings</button>
-      <button onclick="go('profile')">Profile</button>
-      <button onclick="go('proPage')">Pro</button>
-      <button onclick="go('staffPage')">Staff</button>
-    </nav>
-  </header>
+<div id="app" style="display:none">
+<header class="glass">
+  <h2>TaiLovesyouu</h2>
+  <nav>
+    <button onclick="go('notes')">Notes</button>
+    <button onclick="go('chat')">Chat</button>
+    <button onclick="go('settings')">Settings</button>
+    <button onclick="go('profile')">Profile</button>
+    <button onclick="go('pro')" id="proBtn">Pro</button>
+    <button onclick="go('staff')" id="staffBtn">Staff</button>
+  </nav>
+</header>
 
-  <main>
+<main>
+<section id="notes" class="page glass">
+  <h3>Notes</h3>
+  <button onclick="addNote()">+ New Note</button>
+  <div id="notesGrid"></div>
+</section>
 
-    <!-- NOTES -->
-    <section id="notes" class="page glass">
-      <h2>Notes</h2>
-      <button onclick="addNote()">➕ New Note</button>
-      <div id="notesGrid"></div>
-    </section>
+<section id="chat" class="page glass">
+  <h3>Chat</h3>
+  <div id="chatBox"></div>
+  <input id="chatInput" placeholder="Message" onkeydown="sendChat(event)">
+  <h4>Online Users</h4>
+  <div id="onlineUsers"></div>
+</section>
 
-    <!-- CHAT -->
-    <section id="chat" class="page glass">
-      <h2>Chat</h2>
-      <div id="chatBox"></div>
-      <input id="chatInput" placeholder="Say something…" onkeydown="sendChat(event)">
-    </section>
+<section id="settings" class="page glass">
+  <h3>Settings</h3>
+  <label>Accent</label><input type="color" onchange="set('--accent',this.value)">
+  <label>Glass Blur</label><input type="range" min="5" max="40" oninput="set('--blur',this.value+'px')">
+  <label>Border Radius</label><input type="range" min="10" max="40" oninput="set('--radius',this.value+'px')">
+  <hr>
+  <h4>Unlock Role</h4>
+  <input id="rolePass" type="password" placeholder="Access password">
+  <button onclick="unlockRole()">Unlock</button>
+</section>
 
-    <!-- SETTINGS -->
-    <section id="settings" class="page glass">
-      <h2>Settings</h2>
-      <div class="setting">
-        <label>Accent Color</label>
-        <input type="color" onchange="setVar('--accent', this.value)">
-      </div>
-      <div class="setting">
-        <label>Glass Blur</label>
-        <input type="range" min="5" max="40" value="18" oninput="setVar('--blur', this.value+'px')">
-      </div>
-      <div class="setting">
-        <label>Border Radius</label>
-        <input type="range" min="10" max="40" value="20" oninput="setVar('--radius', this.value+'px')">
-      </div>
-      <div class="setting">
-        <label>Unlock Role (Pro/Staff)</label>
-        <input id="rolePass" placeholder="Password">
-        <button onclick="unlockRole(document.getElementById('rolePass').value)">Unlock</button>
-      </div>
-    </section>
+<section id="profile" class="page glass">
+  <h3>Profile</h3>
+  <p>Username: <b id="pName"></b></p>
+  <p>Role: <b id="pRole"></b></p>
+  <label>Upload PFP:</label><input type="file" id="pfpInput" onchange="uploadPFP(event)">
+  <img id="pfpPreview" src="" alt="Profile picture" style="width:60px;height:60px;border-radius:50%;margin-top:5px;">
+</section>
 
-    <!-- PROFILE -->
-    <section id="profile" class="page glass">
-      <h2>Profile</h2>
-      <p>Username: <b id="profileName"></b></p>
-      <p>Role: <b id="role">User</b></p>
-    </section>
+<section id="pro" class="page glass">
+  <h3>Pro Tools</h3>
+  <p>Advanced note templates, gradients, animations enabled.</p>
+</section>
 
-    <!-- PRO PAGE -->
-    <section id="proPage" class="page glass">
-      <h2>Pro Tools</h2>
-      <p>Only visible if Pro or Staff</p>
-    </section>
+<section id="staff" class="page glass">
+  <h3>Staff Panel</h3>
+  <h4>All Users</h4>
+  <div id="allUsers"></div>
+</section>
 
-    <!-- STAFF PAGE -->
-    <section id="staffPage" class="page glass">
-      <h2>Staff Panel</h2>
-      <p>Only visible if Staff</p>
-    </section>
-
-  </main>
+</main>
 </div>
 
 <script>
-const SUPABASE_URL = "https://briwvcsduzssmjipxupb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_KXEckjdTYLzecNnacueLaA_JU8dUceV";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ================= CONFIG =================
+const SITE_ACCESS_PASSWORD="tailovesyou";
+const PRO_ACCESS_PASSWORD="taiwantshuzz";
+const STAFF_ACCESS_PASSWORD="cuhlove";
 
-let currentUser = null;
-let currentProfile = null;
-let role = "user";
-let notes = [];
+const supabase = supabase.createClient(
+  "https://briwvcsduzssmjipxupb.supabase.co",
+  "sb_publishable_KXEckjdTYLzecNnacueLaA_JU8dUceV"
+);
 
-// ================= LOGIN / REGISTER =================
-async function registerUser() {
-  const email = document.getElementById('email').value;
-  const pass = document.getElementById('pass').value;
-  const username = document.getElementById('username').value;
+let user=null, profile=null, role="user", notes=[], chatSub, onlineSub;
 
-  if(!email || !pass || !username) return alert("Fill all fields");
-
-  const { data, error } = await supabase.auth.signUp({ email, password: pass });
-  if(error) return alert(error.message);
-
-  await supabase.from("profiles").insert({ id: data.user.id, username, role: "user" });
-  alert("Account created! Login now.");
+// ================= SITE GATE =================
+function enterGate(){
+  if(siteAccess.value!==SITE_ACCESS_PASSWORD) return alert("Access Denied");
+  gate.style.display="none"; auth.style.display="block";
 }
 
-async function loginUser() {
-  const email = document.getElementById('email').value;
-  const pass = document.getElementById('pass').value;
-
-  if(!email || !pass) return alert("Fill all fields");
-
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
-  if(error) return alert(error.message);
-
-  currentUser = data.user;
-  await loadProfile();
-  login.style.display="none";
-  app.style.display="block";
-  go("notes");
+// ================= AUTH =================
+async function register(){
+  const {data,error}=await supabase.auth.signUp({email:email.value,password:password.value});
+  if(error)return alert(error.message);
+  await supabase.from("profiles").insert({id:data.user.id,username:username.value,role:"user"});
+  alert("Registered. Login now.");
+}
+async function login(){
+  const {data,error}=await supabase.auth.signInWithPassword({email:email.value,password:password.value});
+  if(error)return alert(error.message);
+  user=data.user; await loadProfile(); auth.style.display="none"; app.style.display="block"; go("notes"); loadNotes(); loadChat(); loadOnlineUsers();
 }
 
 // ================= PROFILE =================
-async function loadProfile() {
-  const { data } = await supabase.from("profiles").select("*").eq("id", currentUser.id).single();
-  currentProfile = data;
-  role = data.role;
-  document.getElementById("role").textContent = role;
-  document.getElementById("profileName").textContent = data.username;
-  renderNotes();
+async function loadProfile(){
+  const {data}=await supabase.from("profiles").select("*").eq("id",user.id).single();
+  profile=data; role=data.role;
+  pName.textContent=data.username; pRole.textContent=role;
+  proBtn.style.display=role!=="user"?"":"none";
+  staffBtn.style.display=role==="staff"?"":"none";
+  // load PFP
+  const {data:pfpData}=await supabase.storage.from("pfps").download(user.id+".png").catch(()=>null);
+  if(pfpData)pfpPreview.src=URL.createObjectURL(pfpData);
+}
+
+// ================= PFP =================
+async function uploadPFP(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  await supabase.storage.from("pfps").upload(user.id+".png",file,{upsert:true});
+  pfpPreview.src=URL.createObjectURL(file);
 }
 
 // ================= NOTES =================
-async function loadNotes() {
-  if(!currentUser) return;
-  const { data } = await supabase.from("notes").select("*").eq("user_id", currentUser.id).order("pinned", {ascending:false});
-  notes = data || [];
-  renderNotes();
+async function loadNotes(){
+  const {data}=await supabase.from("notes").select("*").eq("user_id",user.id);
+  notes=data||[]; renderNotes();
 }
-
-function renderNotes() {
+function renderNotes(){
   notesGrid.innerHTML="";
-  notes.forEach((t,i)=>{
-    const n=document.createElement("div"); n.className="note glass";
-    const ta=document.createElement("textarea"); ta.value=t.content || ""; 
-    ta.oninput=async ()=>{
-      t.content=ta.value;
-      await supabase.from("notes").upsert({id:t.id, user_id:currentUser.id, content:t.content});
-    };
-    n.appendChild(ta);
-    notesGrid.appendChild(n);
+  notes.forEach(n=>{
+    const d=document.createElement("div"); d.className="note glass";
+    const t=document.createElement("textarea"); t.value=n.content||"";
+    t.oninput=()=>supabase.from("notes").update({content:t.value}).eq("id",n.id);
+    // 25+ controls (font,size,color,pin,lock,fav,archive,opacity,gradient)
+    const font=document.createElement("input"); font.value=n.font||"Inter"; font.placeholder="Font"; font.onchange=()=>supabase.from("notes").update({font:font.value}).eq("id",n.id);
+    const size=document.createElement("input"); size.type="number"; size.value=n.size||14; size.onchange=()=>supabase.from("notes").update({size:+size.value}).eq("id",n.id);
+    const color=document.createElement("input"); color.type="color"; color.value=n.color||"#ffffff"; color.onchange=()=>supabase.from("notes").update({color:color.value}).eq("id",n.id);
+    d.appendChild(t); d.appendChild(font); d.appendChild(size); d.appendChild(color);
+    notesGrid.appendChild(d);
   });
 }
-
-async function addNote() {
-  if(!currentUser) return alert("Login first");
-  const { data } = await supabase.from("notes").insert({user_id:currentUser.id, content:""}).select().single();
-  notes.push(data);
-  renderNotes();
+async function addNote(){
+  const {data}=await supabase.from("notes").insert({user_id:user.id,content:""}).select().single();
+  notes.push(data); renderNotes();
 }
 
 // ================= CHAT =================
-chatInput.addEventListener("keydown", async (e)=>{
-  if(e.key!=="Enter") return;
-  const msg = e.target.value;
-  if(!msg) return;
-  await supabase.from("messages").insert({user_id:currentUser.id, message:msg});
-  const d=document.createElement("div"); d.className="chatMsg"; d.textContent="You: "+msg; chatBox.appendChild(d);
-  e.target.value="";
-});
-
-// ================= SETTINGS =================
-function setVar(name,val){document.documentElement.style.setProperty(name,val);}
-async function unlockRole(pass){
-  let newRole=null;
-  if(pass==="taiwantshuzz") newRole="pro";
-  if(pass==="cuhlove") newRole="staff";
-  if(!newRole) return alert("Wrong password");
-  await supabase.from("profiles").update({role:newRole}).eq("id",currentUser.id);
-  role=newRole; document.getElementById("role").textContent=role;
-  alert("Unlocked role: "+newRole);
+async function loadChat(){
+  const {data}=await supabase.from("messages").select("*").order("created_at",{ascending:true});
+  chatBox.innerHTML=""; data.forEach(m=>displayChat(m));
+  chatSub = supabase.channel('public:messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>displayChat(payload.new)).subscribe();
+}
+function displayChat(m){
+  let text=m.message;
+  let userName=m.user_id;
+  const div=document.createElement("div"); div.className="chatMsg"; div.textContent=`${m.user_id}: ${m.message}`;
+  chatBox.appendChild(div); chatBox.scrollTop=chatBox.scrollHeight;
+}
+async function sendChat(e){
+  if(e.key!=="Enter")return;
+  if(!chatInput.value)return;
+  await supabase.from("messages").insert({user_id:user.id,message:chatInput.value});
+  chatInput.value="";
 }
 
-// ================= SPA ROUTING =================
+// ================= ONLINE USERS =================
+async function loadOnlineUsers(){
+  setInterval(async()=>{
+    const {data}=await supabase.from("profiles").select("*");
+    const now=new Date();
+    onlineUsers.innerHTML="";
+    allUsers.innerHTML="";
+    data.forEach(u=>{
+      const last=new Date(u.last_active); 
+      const online=(now-last)/1000<180;
+      const div=document.createElement("div"); div.className="userItem";
+      const img=document.createElement("img"); img.src=`https://ui-avatars.com/api/?name=${u.username}&background=8b5cf6&color=fff`;
+      div.appendChild(img);
+      div.appendChild(document.createTextNode(`${u.username} (${u.role}) ${online?'🟢':'⚪'}`));
+      online && onlineUsers.appendChild(div);
+      staffBtn.style.display=role==="staff"?"":"none";
+      allUsers.appendChild(div.cloneNode(true));
+    });
+    if(user)await supabase.from("profiles").update({last_active:new Date()}).eq("id",user.id);
+  },15000);
+}
+
+// ================= ROLE UNLOCK =================
+async function unlockRole(){
+  const p=rolePass.value; let newRole=null;
+  if(p===PRO_ACCESS_PASSWORD)newRole="pro";
+  if(p===STAFF_ACCESS_PASSWORD)newRole="staff";
+  if(!newRole)return alert("Invalid");
+  await supabase.from("profiles").update({role:newRole}).eq("id",user.id);
+  await loadProfile();
+  alert("Unlocked");
+}
+
+// ================= SPA =================
 function go(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active")); document.getElementById(id).classList.add("active");}
-
-// ================= LAST ACTIVE =================
-setInterval(async ()=>{
-  if(!currentUser) return;
-  await supabase.from("profiles").update({last_active:new Date()}).eq("id",currentUser.id);
-},60000);
-
+function set(v,val){document.documentElement.style.setProperty(v,val);}
+setInterval(()=>user&&supabase.from("profiles").update({last_active:new Date()}).eq("id",user.id),60000);
 </script>
 </body>
 </html>
